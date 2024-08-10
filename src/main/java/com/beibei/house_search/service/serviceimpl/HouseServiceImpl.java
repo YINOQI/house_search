@@ -2,6 +2,7 @@ package com.beibei.house_search.service.serviceimpl;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.beibei.house_search.common.result.Result;
 import com.beibei.house_search.common.result.Results;
@@ -18,11 +19,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements HouseService {
     private final StringRedisTemplate stringRedisTemplate;
     private final LocationService locationService;
+
     @Override
     public Result<House> saveHouse(House house) {
         this.save(house);
@@ -40,7 +47,7 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
     @Override
     public Result<House> updateHouse(House house) {
         this.updateById(house);
-        stringRedisTemplate.opsForValue().set(house.getHouseId().toString(),JSONUtil.toJsonStr(house));
+        stringRedisTemplate.opsForValue().set(house.getHouseId().toString(), JSONUtil.toJsonStr(house));
         return Results.success(house);
     }
 
@@ -50,7 +57,7 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
         House house;
         if (StrUtil.isNotBlank(houseStr)) {
             house = JSONUtil.toBean(houseStr, House.class);
-        }else {
+        } else {
             house = this.getById(houseId);
         }
 
@@ -63,8 +70,24 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
 
     @Override
     public Result<PageDTO<HouseVo>> getHousePage(HousePageQuery housePageQuery) {
+        Page<House> page = this.lambdaQuery()
+                .eq(StrUtil.isNotEmpty(housePageQuery.getKey()), House::getHouseName, housePageQuery.getKey())
+                .page(housePageQuery.toMpPageDefaultSortByCreateTimeDesc());
 
-        return null;
+        List<House> pageRecords = page.getRecords();
+        List<Long> houseIds = pageRecords.stream().map(House::getHouseId).collect(Collectors.toList());
+        Map<Long, Location> locationMap = locationService.listByIds(houseIds).stream().collect(Collectors.toMap(Location::getLocationId, o -> o));
+
+        List<HouseVo> houseVoList = new ArrayList<>();
+        pageRecords.forEach( house ->{
+            Location location = locationMap.get(house.getLocationId());
+            HouseVo houseVo = BeanUtils.copyBean(house, HouseVo.class).setLocation(location);
+            houseVoList.add(houseVo);
+        });
+
+        PageDTO<HouseVo> houseVoPageDTO = PageDTO.of(page, houseVoList);
+
+        return Results.success(houseVoPageDTO);
     }
 
 

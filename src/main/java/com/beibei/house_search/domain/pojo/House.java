@@ -1,5 +1,6 @@
 package com.beibei.house_search.domain.pojo;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 //@ApiModel(value = "房子实体",description = "房子实体")
 public class House {
 //    @ApiModelProperty(value = "主键",required = true)
+    @TableId
     private Long houseId;
 //    @ApiModelProperty(value = "商品房名称",required = true)
     private String houseName;
