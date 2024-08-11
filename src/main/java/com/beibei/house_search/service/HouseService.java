@@ -2,6 +2,7 @@ package com.beibei.house_search.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.beibei.house_search.common.result.Result;
+import com.beibei.house_search.domain.dto.HouseDto;
 import com.beibei.house_search.domain.dto.PageDTO;
 import com.beibei.house_search.domain.pojo.House;
 import com.beibei.house_search.domain.query.HousePageQuery;
@@ -10,10 +11,10 @@ import com.beibei.house_search.domain.vo.HouseVo;
 public interface HouseService extends IService<House> {
     /**
      * 保存房源
-     * @param house
+     * @param houseDto
      * @return
      */
-    Result<House> saveHouse(House house);
+    Result<HouseDto> saveHouse(HouseDto houseDto);
 
     /**
      * 删除房源
@@ -24,10 +25,10 @@ public interface HouseService extends IService<House> {
 
     /**
      * 更新房源信息
-     * @param house
+     * @param houseDto
      * @return
      */
-    Result<House> updateHouse(House house);
+    Result<HouseDto> updateHouse(HouseDto houseDto);
 
     /**
      * 根据id获取房源信息

@@ -3,7 +3,7 @@ package com.beibei.house_search.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.beibei.house_search.common.result.Result;
 import com.beibei.house_search.domain.dto.PageDTO;
-import com.beibei.house_search.domain.pojo.Location;
+import com.beibei.house_search.domain.dto.RentHouseDto;
 import com.beibei.house_search.domain.pojo.RentHouse;
 import com.beibei.house_search.domain.query.RentHousePageQuery;
 import com.beibei.house_search.domain.vo.RentHouseVo;
@@ -11,10 +11,10 @@ import com.beibei.house_search.domain.vo.RentHouseVo;
 public interface RentHouseService extends IService<RentHouse> {
     /**
      * 保存租房房源
-     * @param rentHouse
+     * @param rentHouseDto
      * @return
      */
-    Result<RentHouseVo> saveRentHouse(RentHouse rentHouse, Location location);
+    Result<RentHouseVo> saveRentHouse(RentHouseDto rentHouseDto);
 
     /**
      * 删除租房房源
@@ -25,11 +25,10 @@ public interface RentHouseService extends IService<RentHouse> {
 
     /**
      * 更新租房房源信息
-     * @param rentHouse
+     * @param rentHouseDto
      * @return
      */
-    Result<RentHouseVo> updateRentHouse(RentHouse rentHouse);
-    Result<RentHouseVo> updateRentHouse(RentHouse rentHouse,Location location);
+    Result<RentHouseVo> updateRentHouse(RentHouseDto rentHouseDto);
 
     /**
      * 根据id获取租房房源信息

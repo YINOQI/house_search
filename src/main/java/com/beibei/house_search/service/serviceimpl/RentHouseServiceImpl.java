@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.beibei.house_search.common.result.Result;
 import com.beibei.house_search.common.result.Results;
 import com.beibei.house_search.domain.dto.PageDTO;
+import com.beibei.house_search.domain.dto.RentHouseDto;
 import com.beibei.house_search.domain.pojo.Location;
 import com.beibei.house_search.domain.pojo.RentHouse;
 import com.beibei.house_search.domain.query.RentHousePageQuery;
@@ -33,19 +34,20 @@ public class RentHouseServiceImpl extends ServiceImpl<RentHouseMapper, RentHouse
     private final LocationService locationService;
 
     @Override
-    public Result<RentHouseVo> saveRentHouse(RentHouse rentHouse, Location location) {
+    public Result<RentHouseVo> saveRentHouse(RentHouseDto rentHouseDto) {
+        Location location = rentHouseDto.getLocation();
         // 保存位置
         locationService.save(location);
         // 设置该租房的地址位置信息id
-        rentHouse.setLocationId(location.getLocationId());
+        rentHouseDto.setLocationId(location.getLocationId());
         // 保存租房信息
-        this.save(rentHouse);
+        this.save(rentHouseDto);
         // 转化成RentHouseVo
-        RentHouseVo rentHouseVo = BeanUtils.copyBean(rentHouse, RentHouseVo.class);
+        RentHouseVo rentHouseVo = BeanUtils.copyBean(rentHouseDto, RentHouseVo.class);
         // 设置位置信息
         rentHouseVo.setLocation(location);
         // 保存到redis
-        stringRedisTemplate.opsForValue().set(rentHouse.getRentHouseId().toString(), JSONUtil.toJsonStr(rentHouseVo));
+        stringRedisTemplate.opsForValue().set(rentHouseDto.getRentHouseId().toString(), JSONUtil.toJsonStr(rentHouseVo));
         // 返回rentHouseVo信息
         return Results.success(rentHouseVo);
     }
@@ -60,22 +62,16 @@ public class RentHouseServiceImpl extends ServiceImpl<RentHouseMapper, RentHouse
     }
 
     @Override
-    public Result<RentHouseVo> updateRentHouse(RentHouse rentHouse) {
-        Location location = locationService.getById(rentHouse.getLocationId());
-
-        return updateRentHouse(rentHouse,location);
-    }
-
-    @Override
-    public Result<RentHouseVo> updateRentHouse(RentHouse rentHouse,Location location) {
-        this.updateById(rentHouse);
+    public Result<RentHouseVo> updateRentHouse(RentHouseDto rentHouseDto) {
+        Location location = rentHouseDto.getLocation();
         locationService.updateById(location);
+        this.updateById(rentHouseDto);
         // 转化成RentHouseVo
-        RentHouseVo rentHouseVo = BeanUtils.copyBean(rentHouse, RentHouseVo.class);
+        RentHouseVo rentHouseVo = BeanUtils.copyBean(rentHouseDto, RentHouseVo.class);
         // 设置位置信息
         rentHouseVo.setLocation(location);
         // 保存到redis
-        stringRedisTemplate.opsForValue().set(rentHouse.getRentHouseId().toString(), JSONUtil.toJsonStr(rentHouseVo));
+        stringRedisTemplate.opsForValue().set(rentHouseDto.getRentHouseId().toString(), JSONUtil.toJsonStr(rentHouseVo));
         // 返回rentHouseVo信息
         return Results.success(rentHouseVo);
     }

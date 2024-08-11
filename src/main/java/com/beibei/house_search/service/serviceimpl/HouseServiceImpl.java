@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.beibei.house_search.common.result.Result;
 import com.beibei.house_search.common.result.Results;
+import com.beibei.house_search.domain.dto.HouseDto;
 import com.beibei.house_search.domain.dto.PageDTO;
 import com.beibei.house_search.domain.pojo.House;
 import com.beibei.house_search.domain.pojo.Location;
@@ -31,10 +32,20 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
     private final LocationService locationService;
 
     @Override
-    public Result<House> saveHouse(House house) {
-        this.save(house);
-        stringRedisTemplate.opsForValue().set(house.getHouseId().toString(), JSONUtil.toJsonStr(house));
-        return Results.success(house);
+    public Result<HouseDto> saveHouse(HouseDto houseDto) {
+        Location location = houseDto.getLocation();
+        locationService.save(location);
+
+        houseDto.setLocation(location)
+                .setLocationId(location.getLocationId());
+        this.save(houseDto);
+
+        stringRedisTemplate.opsForValue().set(
+                houseDto.getHouseId().toString(),
+                JSONUtil.toJsonStr(houseDto)
+        );
+
+        return Results.success(houseDto);
     }
 
     @Override
@@ -45,10 +56,15 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
     }
 
     @Override
-    public Result<House> updateHouse(House house) {
-        this.updateById(house);
-        stringRedisTemplate.opsForValue().set(house.getHouseId().toString(), JSONUtil.toJsonStr(house));
-        return Results.success(house);
+    public Result<HouseDto> updateHouse(HouseDto houseDto) {
+        this.updateById(houseDto);
+        Location location = houseDto.getLocation();
+        locationService.updateById(location);
+        stringRedisTemplate.opsForValue().set(
+                houseDto.getHouseId().toString(),
+                JSONUtil.toJsonStr(houseDto.setLocation(location).setLocationId(location.getLocationId()))
+        );
+        return Results.success(houseDto);
     }
 
     @Override
